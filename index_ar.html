@@ -236,7 +236,7 @@
                 <h1 class="text-xl md:text-2xl font-cairo text-yellow-100 font-bold tracking-wider">الساعة الغروبية</h1>
             </div>
 
-            <!-- UPDATED SECTION START -->
+            <!-- Language Switcher -->
             <div class="flex items-center gap-4">
                 <div class="hidden md:block text-sm text-yellow-500/80 italic">
                     التوقيت الغروبي (العربي)
@@ -245,8 +245,6 @@
                     English
                 </a>
             </div>
-            <!-- UPDATED SECTION END -->
-
         </div>
     </header>
 
@@ -262,9 +260,15 @@
                         <div class="loader"></div>
                         <span class="text-yellow-100">جاري تحديد موعد الغروب...</span>
                     </div>
-                    <div id="location-display" class="hidden flex justify-between items-center px-4">
-                        <div class="text-right"> <!-- Logic flip due to RTL -->
-                            <h2 class="text-yellow-500 font-cairo text-sm"><i class="fa-solid fa-location-dot ml-2"></i><span id="city-name">غير معروف</span></h2>
+                    
+                    <!-- Interactive Location Display -->
+                    <div id="location-display" class="hidden flex justify-between items-center px-4" onclick="getLocation()" style="cursor: pointer;" title="انقر لتحديث الموقع">
+                        <div class="text-right hover:opacity-80 transition-opacity">
+                            <h2 class="text-yellow-500 font-cairo text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span id="city-name">غير معروف</span>
+                                <i class="fa-solid fa-rotate-right text-xs text-yellow-700"></i>
+                            </h2>
                             <p class="text-zinc-500 text-[10px]" id="coords">--</p>
                         </div>
                         <div class="text-left">
@@ -492,6 +496,10 @@
         }
 
         function getLocation() {
+            // Show loading state whenever this is called
+            els.locPanel.classList.add('hidden');
+            els.loader.classList.remove('hidden');
+
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
@@ -664,4 +672,3 @@
     </script>
 </body>
 </html>
-
