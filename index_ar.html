@@ -4,30 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الساعة الغروبية</title>
-
-<!-- Navbar -->
-    <header class="bg-black/50 backdrop-blur-md border-b border-yellow-900/30 sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-sun text-yellow-500 text-2xl"></i>
-                <h1 class="text-xl md:text-2xl font-cinzel text-yellow-100 font-bold tracking-wider">Arabic Clock</h1>
-            </div>
-            
-            <!-- UPDATED SECTION START -->
-            <div class="flex items-center gap-4">
-                <div class="hidden md:block text-xs text-yellow-500/80 font-serif italic">
-                    Arabic Time (Ghurubiyah)
-                </div>
-                <a href="index_ar.html" class="text-xs bg-yellow-900/20 border border-yellow-600/50 px-3 py-1 rounded-full text-yellow-500 hover:bg-yellow-600 hover:text-black transition-all font-serif">
-                    عربي
-                </a>
-            </div>
-            <!-- UPDATED SECTION END -->
-
-        </div>
-    </header>
-
-    <main class="flex-grow container mx-auto px-4 py-8">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -259,9 +235,18 @@
                 <i class="fa-solid fa-sun text-yellow-500 text-2xl"></i>
                 <h1 class="text-xl md:text-2xl font-cairo text-yellow-100 font-bold tracking-wider">الساعة الغروبية</h1>
             </div>
-            <div class="hidden md:block text-sm text-yellow-500/80 italic">
-                التوقيت الغروبي (العربي)
+
+            <!-- UPDATED SECTION START -->
+            <div class="flex items-center gap-4">
+                <div class="hidden md:block text-sm text-yellow-500/80 italic">
+                    التوقيت الغروبي (العربي)
+                </div>
+                <a href="index.html" class="text-xs bg-yellow-900/20 border border-yellow-600/50 px-3 py-1 rounded-full text-yellow-500 hover:bg-yellow-600 hover:text-black transition-all font-cairo" dir="ltr">
+                    English
+                </a>
             </div>
+            <!-- UPDATED SECTION END -->
+
         </div>
     </header>
 
@@ -394,9 +379,9 @@
                         <div class="flex items-start gap-3 p-3 bg-black/20 rounded border border-zinc-500/20">
                             <div class="mt-1 text-white ml-3"><i class="fa-regular fa-clock"></i></div>
                             <div>
-                                <h4 class="font-bold text-white font-cairo">الساعة الصغيرة (التوقيت المحلي)</h4>
+                                <h4 class="font-bold text-white font-cairo">المينا الصغيرة (التوقيت المحلي)</h4>
                                 <p class="text-zinc-400 text-sm">
-                                    الساعة الصغيرة في الأسفل تعرض التوقيت النظامي (توقيت جوالك) لكي تبقى على تواصل مع العالم الحديث.
+                                    المينا الصغيرة في الأسفل تعرض التوقيت النظامي (توقيت جوالك) لكي تبقى على تواصل مع العالم الحديث.
                                 </p>
                             </div>
                         </div>
@@ -421,7 +406,7 @@
 
     <footer class="bg-black border-t border-zinc-800 py-6 text-center text-zinc-600 text-xs font-cairo">
         <p>البيانات الفلكية مزودة عبر <a href="https://sunrise-sunset.org/api" target="_blank" class="underline hover:text-zinc-400">Sunrise-Sunset API</a></p>
-        <p class="mt-1">&copy; 2025 الساعة الغروبية</p>
+        <p class="mt-1">&copy; 2025 مشروع الساعة الشمسية</p>
     </footer>
 
     <script>
@@ -678,5 +663,4 @@
         init();
     </script>
 </body>
-
 </html>
