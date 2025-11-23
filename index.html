@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Arabic Clock</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --clock-gold: #d4af37;
+            --clock-bronze: #cd7f32;
+            --clock-face: #fdf6e3;
+            --clock-dark: #1a1a1a;
+            --sub-dial-bg: rgba(255, 255, 255, 0.4);
+        }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            background-color: #0f0f0f;
+            color: #e0e0e0;
+            background-image: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+        }
+
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* --- MAIN CLOCK CONTAINER --- */
+        .clock-container {
+            position: relative;
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            background: var(--clock-face);
+            border: 14px solid #2c2c2c;
+            box-shadow: 
+                0 0 0 4px var(--clock-gold),
+                0 0 0 12px #4a3b22,
+                0 20px 50px rgba(0,0,0,0.9),
+                inset 0 0 60px rgba(0,0,0,0.2);
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Background Pattern */
+        .clock-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0 L61.2 38.8 L100 50 L61.2 61.2 L50 100 L38.8 61.2 L0 50 L38.8 38.8 Z' fill='none' stroke='%23d4af37' stroke-width='0.5' opacity='0.4'/%3E%3Cpath d='M50 10 L60 40 L90 50 L60 60 L50 90 L40 60 L10 50 L40 40 Z' fill='none' stroke='%231a1a1a' stroke-width='0.2' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%23d4af37' stroke-width='0.5' opacity='0.3'/%3E%3C/svg%3E");
+            background-size: 100px 100px;
+            opacity: 0.6;
+            z-index: 0;
+        }
+        
+        .central-rosette {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            z-index: 0;
+            opacity: 0.15;
+            animation: pulse-slow 10s infinite alternate;
+        }
+        @keyframes pulse-slow { from { opacity: 0.1; } to { opacity: 0.2; } }
+
+        .clock-inner-ring {
+            position: absolute;
+            width: 94%;
+            height: 94%;
+            border-radius: 50%;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            z-index: 1;
+        }
+
+        /* Clock Numbers (Main Dial) */
+        .clock-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: -20px;
+            margin-top: -20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #000;
+            font-family: 'Cinzel', serif;
+            font-weight: 900;
+            font-size: 1.6rem;
+            pointer-events: none;
+            z-index: 5;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        /* --- HANDS (Main) --- */
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 4px;
+            z-index: 20;
+            transition: transform 0.1s cubic-bezier(0.4, 2.08, 0.55, 0.44);
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .hand-hour { width: 6px; height: 70px; background: var(--clock-dark); margin-left: -3px; z-index: 22; }
+        .hand-minute { width: 4px; height: 100px; background: var(--clock-dark); margin-left: -2px; z-index: 23; }
+        .hand-second { width: 2px; height: 115px; background: #aa0000; margin-left: -1px; z-index: 24; }
+
+        /* Sun Pointer */
+        .hand-sun {
+            width: 2px; height: 150px; background: transparent; margin-left: -1px; z-index: 15;
+            transition: transform 1s linear; box-shadow: none;
+        }
+        .hand-sun::after {
+            content: '\f185'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            position: absolute; top: -15px; left: -10px; color: #e6b800; font-size: 22px;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+        }
+        .hand-sun-line {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, transparent 20%, #e6b800 100%); opacity: 0.6;
+        }
+
+        /* Static Arms */
+        .marker-arm {
+            position: absolute; bottom: 50%; left: 50%; width: 2px; height: 105px;
+            transform-origin: bottom center; z-index: 4; opacity: 0.8;
+        }
+        .marker-arm::before {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            border-left: 2px dashed;
+        }
+        .marker-label {
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            font-family: 'Cinzel', serif; font-size: 0.60rem; font-weight: bold; letter-spacing: 1px;
+            padding: 2px 4px; border-radius: 2px; white-space: nowrap;
+        }
+        .arm-rise { color: #2563eb; }
+        .arm-rise .marker-label { background: rgba(37, 99, 235, 0.1); border: 1px solid rgba(37, 99, 235, 0.3); }
+        .arm-set { color: #c2410c; }
+        .arm-set .marker-label { background: rgba(194, 65, 12, 0.1); border: 1px solid rgba(194, 65, 12, 0.3); }
+
+        /* --- SUB DIAL (Standard Time Complication) --- */
+        .sub-dial {
+            position: absolute;
+            bottom: 60px; /* Position at bottom of clock */
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--sub-dial-bg);
+            border: 1px solid rgba(26, 26, 26, 0.2);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .sub-dial-label {
+            position: absolute;
+            top: 25px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.5rem;
+            font-weight: bold;
+            color: #444;
+            letter-spacing: 1px;
+            z-index: 1;
+        }
+
+        .sub-marker {
+            position: absolute;
+            width: 2px;
+            height: 4px;
+            background: #333;
+            top: 2px;
+            left: 50%;
+            margin-left: -1px;
+            transform-origin: center 43px; /* 90/2 - 2 */
+        }
+        
+        .sub-hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            background: #1a1a1a;
+            border-radius: 2px;
+            z-index: 12;
+        }
+        .sub-hand-hour { width: 3px; height: 25px; margin-left: -1.5px; }
+        .sub-hand-minute { width: 2px; height: 35px; margin-left: -1px; }
+        
+        .sub-nut {
+            position: absolute; width: 6px; height: 6px; background: #333;
+            border-radius: 50%; z-index: 15;
+        }
+
+        /* Main Center Nut */
+        .center-nut {
+            position: absolute; width: 18px; height: 18px;
+            background: radial-gradient(circle at 30% 30%, #ffeebb, #d4af37);
+            border: 1px solid #8a6e1c; border-radius: 50%; z-index: 30;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--clock-gold); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="bg-black/50 backdrop-blur-md border-b border-yellow-900/30 sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-sun text-yellow-500 text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-cinzel text-yellow-100 font-bold tracking-wider">Arabic Clock</h1>
+            </div>
+            <div class="hidden md:block text-xs text-yellow-500/80 font-serif italic">
+                Arabic Time (Ghurubiyah)
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            <!-- Left Column: The Clock -->
+            <div class="flex flex-col items-center space-y-8">
+                
+                <!-- Status Panel -->
+                <div id="status-panel" class="w-full max-w-md bg-zinc-900/80 border border-yellow-900/30 rounded-lg p-4 text-center backdrop-blur-sm">
+                    <div id="loading-indicator" class="flex justify-center items-center gap-3">
+                        <div class="loader"></div>
+                        <span class="text-yellow-100">Aligning with Sunset...</span>
+                    </div>
+                    <div id="location-display" class="hidden flex justify-between items-center px-4">
+                        <div class="text-left">
+                            <h2 class="text-yellow-500 font-cinzel text-sm"><i class="fa-solid fa-location-dot mr-2"></i><span id="city-name">Unknown</span></h2>
+                            <p class="text-zinc-500 text-[10px]" id="coords">--</p>
+                        </div>
+                        <div class="text-right">
+                             <div class="text-[10px] text-zinc-400 uppercase">Sunset (Start)</div>
+                             <div class="text-orange-400 font-cinzel" id="ref-sunset-time">--:--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The Clock -->
+                <div class="relative p-4 transform scale-95 sm:scale-100 transition-transform">
+                    <div class="clock-container">
+                        <!-- Background Pattern -->
+                        <div class="clock-pattern"></div>
+                        <!-- Central Decorative SVG Rosette -->
+                        <svg class="central-rosette" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <g stroke="#1a1a1a" stroke-width="0.5" fill="none">
+                                <path d="M50 10 L65 35 L90 50 L65 65 L50 90 L35 65 L10 50 L35 35 Z" />
+                                <path d="M50 0 L70 30 L100 50 L70 70 L50 100 L30 70 L0 50 L30 30 Z" opacity="0.5" />
+                                <circle cx="50" cy="50" r="20" stroke="#d4af37" />
+                            </g>
+                        </svg>
+
+                        <div class="clock-inner-ring"></div>
+
+                        <!-- Main Dial Numerals -->
+                        <div id="clock-face-numbers"></div>
+
+                        <!-- SUB DIAL (Standard Time) -->
+                        <div class="sub-dial" id="sub-dial">
+                            <div class="sub-dial-label">STANDARD</div>
+                            <!-- Markers generated by JS -->
+                            <div id="sub-dial-markers"></div>
+                            <div class="sub-hand sub-hand-hour" id="sub-hand-hour"></div>
+                            <div class="sub-hand sub-hand-minute" id="sub-hand-minute"></div>
+                            <div class="sub-nut"></div>
+                        </div>
+
+                        <!-- Rise/Set Markers -->
+                        <div class="marker-arm arm-rise" id="arm-rise">
+                            <span class="marker-label">RISE</span>
+                        </div>
+                        <div class="marker-arm arm-set" id="arm-set">
+                            <span class="marker-label">SET</span>
+                        </div>
+
+                        <!-- Main Hands -->
+                        <div class="hand hand-sun" id="hand-sun">
+                            <div class="hand-sun-line"></div>
+                        </div>
+                        <div class="hand hand-hour" id="hand-hour"></div>
+                        <div class="hand hand-minute" id="hand-minute"></div>
+                        <div class="hand hand-second" id="hand-second"></div>
+                        
+                        <div class="center-nut"></div>
+                    </div>
+                    
+                    <div class="text-center mt-6 space-y-1">
+                        <p class="font-cinzel text-yellow-600 text-sm tracking-[0.3em]">ARABIC TIME</p>
+                        <p class="text-[10px] text-zinc-500">Main Dial: Time since Sunset • Sub Dial: Local Time</p>
+                    </div>
+                </div>
+
+                <!-- Digital Dashboard -->
+                <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+                    <div class="bg-zinc-800/50 border border-yellow-900/20 p-4 rounded text-center">
+                        <i class="fa-regular fa-clock text-blue-400 mb-2 text-xl"></i>
+                        <div class="text-xs text-zinc-400 uppercase tracking-widest">Standard Time</div>
+                        <div class="text-xl font-cinzel text-white" id="digital-local">--:--</div>
+                    </div>
+                    <div class="bg-zinc-800/50 border border-yellow-900/20 p-4 rounded text-center">
+                        <i class="fa-solid fa-hourglass-start text-yellow-500 mb-2 text-xl"></i>
+                        <div class="text-xs text-zinc-400 uppercase tracking-widest">Time Since Sunset</div>
+                        <div class="text-xl font-cinzel text-yellow-200" id="digital-solar">--:--</div>
+                    </div>
+                    <div class="bg-zinc-800/50 border border-yellow-900/20 p-3 rounded flex justify-between items-center px-4 col-span-2">
+                        <div class="flex flex-col items-center w-1/3 border-r border-zinc-700">
+                            <span class="text-[10px] text-zinc-400">Sunrise</span>
+                            <span class="font-cinzel text-blue-300" id="sunrise-time">--:--</span>
+                        </div>
+                        <div class="flex flex-col items-center w-1/3">
+                             <span class="text-[10px] text-zinc-400">Daylight</span>
+                             <span class="font-cinzel text-yellow-500" id="solar-percent">0%</span>
+                        </div>
+                        <div class="flex flex-col items-center w-1/3 border-l border-zinc-700">
+                            <span class="text-[10px] text-zinc-400">Sunset</span>
+                            <span class="font-cinzel text-orange-300" id="sunset-time">--:--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Description -->
+            <div class="bg-zinc-900/40 border-l border-yellow-900/30 p-6 md:p-10 rounded-r-xl h-full overflow-y-auto max-h-[80vh]">
+                <h2 class="text-3xl font-cinzel text-yellow-500 mb-6">Reading the Dual Dial</h2>
+                
+                <div class="prose prose-invert prose-yellow text-sm md:text-base">
+                    <p class="leading-relaxed text-zinc-300 mb-4">
+                        This timepiece combines two distinct timekeeping systems into one instrument.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 gap-4 my-6">
+                        <!-- Feature 1 -->
+                        <div class="flex items-start gap-3 p-3 bg-black/20 rounded border border-orange-900/20">
+                            <div class="mt-1 text-orange-500"><i class="fa-solid fa-cloud-moon"></i></div>
+                            <div>
+                                <h4 class="font-bold text-orange-100 font-cinzel">Main Dial (Arabic)</h4>
+                                <p class="text-zinc-400 text-xs">
+                                    The large hands track <strong>Time Since Sunset</strong>. <br>
+                                    The clock resets to 12:00 every day at Maghrib (Sunset).
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Feature 2 -->
+                        <div class="flex items-start gap-3 p-3 bg-black/20 rounded border border-zinc-500/20">
+                            <div class="mt-1 text-white"><i class="fa-regular fa-clock"></i></div>
+                            <div>
+                                <h4 class="font-bold text-white font-cinzel">Sub-Dial (Standard)</h4>
+                                <p class="text-zinc-400 text-xs">
+                                    The small dial at the bottom shows your local <strong>Standard Time</strong> (e.g., what's on your phone). This complication allows you to coordinate without losing the spiritual solar context.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Feature 3 -->
+                        <div class="flex items-start gap-3 p-3 bg-black/20 rounded border border-yellow-500/20">
+                            <div class="mt-1 text-yellow-500"><i class="fa-solid fa-sun"></i></div>
+                            <div>
+                                <h4 class="font-bold text-yellow-100 font-cinzel">Golden Sun Pointer</h4>
+                                <p class="text-zinc-400 text-xs">
+                                    Tracks the sun's physical position. <br>
+                                    <strong>Left:</strong> Rising towards noon. <br>
+                                    <strong>Right:</strong> Setting towards dusk.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-black border-t border-zinc-800 py-6 text-center text-zinc-600 text-xs">
+        <p>Powered by <a href="https://sunrise-sunset.org/api" target="_blank" class="underline hover:text-zinc-400">Sunrise-Sunset API</a></p>
+        <p class="mt-1">&copy; 2025 Arabic Clock</p>
+    </footer>
+
+    <script>
+        // --- CONSTANTS & STATE ---
+        const API_URL = 'https://api.sunrise-sunset.org/json';
+        const DEFAULT_COORDS = { lat: 21.4225, lng: 39.8262, name: "Mecca (Default)" }; 
+        
+        let state = {
+            lat: null,
+            lng: null,
+            sunrise: null,   
+            sunset: null,    
+            prevSunset: null 
+        };
+
+        // --- ELEMENTS ---
+        const els = {
+            handHour: document.getElementById('hand-hour'),
+            handMinute: document.getElementById('hand-minute'),
+            handSecond: document.getElementById('hand-second'),
+            handSun: document.getElementById('hand-sun'),
+            // Sub Dial Hands
+            subHandHour: document.getElementById('sub-hand-hour'),
+            subHandMinute: document.getElementById('sub-hand-minute'),
+            
+            armRise: document.getElementById('arm-rise'),
+            armSet: document.getElementById('arm-set'),
+            digLocal: document.getElementById('digital-local'),
+            digSolar: document.getElementById('digital-solar'),
+            dispSunrise: document.getElementById('sunrise-time'),
+            dispSunset: document.getElementById('sunset-time'),
+            dispRefSunset: document.getElementById('ref-sunset-time'),
+            solarPct: document.getElementById('solar-percent'),
+            loader: document.getElementById('loading-indicator'),
+            locPanel: document.getElementById('location-display'),
+            city: document.getElementById('city-name'),
+            coords: document.getElementById('coords')
+        };
+
+        // --- INIT ---
+        function init() {
+            generateClockFace();
+            generateSubDialMarkers();
+            getLocation();
+            
+            setInterval(() => updateClock(), 1000);
+            updateClock(); 
+        }
+
+        function generateClockFace() {
+            const container = document.getElementById('clock-face-numbers');
+            const numerals = ['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+            container.innerHTML = '';
+
+            numerals.forEach((num, index) => {
+                const angle = index * 30;
+                const rad = (angle - 90) * (Math.PI / 180);
+                const radius = 145; 
+                
+                const el = document.createElement('div');
+                el.classList.add('clock-number');
+                el.innerText = num;
+                
+                const x = Math.cos(rad) * radius;
+                const y = Math.sin(rad) * radius;
+                
+                el.style.transform = `translate(${x}px, ${y}px)`;
+                container.appendChild(el);
+            });
+        }
+        
+        function generateSubDialMarkers() {
+            const container = document.getElementById('sub-dial-markers');
+            for(let i=0; i<12; i++) {
+                const el = document.createElement('div');
+                el.classList.add('sub-marker');
+                el.style.transform = `rotate(${i*30}deg)`;
+                // Make cardinal markers slightly distinct
+                if(i%3 === 0) el.style.height = '6px';
+                container.appendChild(el);
+            }
+        }
+
+        // --- GEOLOCATION & DATA ---
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        state.lat = pos.coords.latitude;
+                        state.lng = pos.coords.longitude;
+                        els.city.innerText = "Your Location";
+                        els.coords.innerText = `${state.lat.toFixed(2)}, ${state.lng.toFixed(2)}`;
+                        fetchSolarData(state.lat, state.lng);
+                    },
+                    (err) => {
+                        console.warn("Geo denied/error", err);
+                        useDefault();
+                    }
+                );
+            } else {
+                useDefault();
+            }
+        }
+
+        function useDefault() {
+            state.lat = DEFAULT_COORDS.lat;
+            state.lng = DEFAULT_COORDS.lng;
+            els.city.innerText = DEFAULT_COORDS.name;
+            fetchSolarData(state.lat, state.lng);
+        }
+
+        async function fetchSolarData(lat, lng) {
+            try {
+                const res = await fetch(`${API_URL}?lat=${lat}&lng=${lng}&formatted=0`);
+                const data = await res.json();
+                if(data.status === 'OK') {
+                    const r = data.results;
+                    state.sunrise = new Date(r.sunrise);
+                    state.sunset = new Date(r.sunset);
+                    
+                    updateStaticUI();
+                    // Force update immediately after data load
+                    updateClock();
+                    
+                    els.loader.classList.add('hidden');
+                    els.locPanel.classList.remove('hidden');
+                }
+            } catch(e) {
+                console.error(e);
+                els.loader.innerText = "Error fetching data.";
+            }
+        }
+
+        function updateStaticUI() {
+            const opts = { hour:'2-digit', minute:'2-digit' };
+            els.dispSunrise.innerText = state.sunrise.toLocaleTimeString([], opts);
+            els.dispSunset.innerText = state.sunset.toLocaleTimeString([], opts);
+        }
+
+        // --- UPDATE LOOPS ---
+
+        function updateClock() {
+            const now = new Date();
+            
+            // --- SUB DIAL (Standard Time) ---
+            const stdH = now.getHours();
+            const stdM = now.getMinutes();
+            const stdS = now.getSeconds();
+            
+            // Continuous rotation for smooth movement
+            const stdMDeg = ((stdM + stdS/60) / 60) * 360;
+            const stdHDeg = ((stdH % 12 + stdM/60) / 12) * 360;
+            
+            els.subHandMinute.style.transform = `rotate(${stdMDeg}deg)`;
+            els.subHandHour.style.transform = `rotate(${stdHDeg}deg)`;
+            
+            // Digital Local Time
+            els.digLocal.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+
+            // --- MAIN DIAL (Arabic Time) ---
+            if (!state.sunset) return;
+
+            let lastSunset = new Date(state.sunset);
+            if (now < lastSunset) {
+                lastSunset = new Date(lastSunset.getTime() - (24 * 60 * 60 * 1000));
+            }
+            state.prevSunset = lastSunset;
+            
+            els.dispRefSunset.innerText = lastSunset.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+
+            // Calculate Elapsed Time Since Sunset (Seconds)
+            const elapsedMS = now - lastSunset;
+            const elapsedSec = Math.floor(elapsedMS / 1000);
+            
+            const h = Math.floor(elapsedSec / 3600);
+            const m = Math.floor((elapsedSec % 3600) / 60);
+            const s = Math.floor(elapsedSec % 60);
+
+            // Digital Display (Time since sunset)
+            const pad = (n) => n.toString().padStart(2, '0');
+            els.digSolar.innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
+
+            // Hand Rotation (Arabic)
+            // Fix for "not moving": Use total elapsed seconds for continuous forward motion
+            // This prevents the 360->0 counter-clockwise flick and ensures motion relative to sunset
+            const sDeg = elapsedSec * 6; 
+            
+            const mDeg = (m * 6) + (s * 0.1);
+            const hDeg = ((h % 12) * 30) + (m * 0.5);
+
+            els.handSecond.style.transform = `rotate(${sDeg}deg)`;
+            els.handMinute.style.transform = `rotate(${mDeg}deg)`;
+            els.handHour.style.transform = `rotate(${hDeg}deg)`;
+
+            // Rise/Set Arms
+            els.armSet.style.transform = `rotate(0deg)`; // Fixed at 12
+            
+            let relevantSunrise = new Date(state.sunrise);
+            let relevantSunset = lastSunset;
+            
+            if (now > state.sunset) {
+                relevantSunrise = new Date(state.sunrise.getTime() + (24 * 60 * 60 * 1000));
+            } else {
+                relevantSunrise = new Date(state.sunrise);
+            }
+            
+            const msUntilRise = relevantSunrise - relevantSunset;
+            const hoursUntilRise = msUntilRise / (1000 * 60 * 60);
+            const riseDeg = (hoursUntilRise % 12) * 30; 
+            
+            els.armRise.style.transform = `rotate(${riseDeg}deg)`;
+
+            // Sun Pointer
+            updateSunPointer(now);
+        }
+
+        function updateSunPointer(now) {
+            if(!state.sunrise) return;
+            
+            const nowTime = now.getTime();
+            const riseTime = state.sunrise.getTime();
+            const setTime = state.sunset.getTime();
+            
+            let angle = 0; 
+            let pct = 0;
+
+            if(nowTime >= riseTime && nowTime <= setTime) {
+                // Day
+                const total = setTime - riseTime;
+                const elapsed = nowTime - riseTime;
+                const frac = elapsed / total;
+                pct = Math.floor(frac * 100);
+                angle = -90 + (frac * 180); 
+                
+                els.handSun.style.opacity = 1;
+                els.solarPct.style.color = "#d4af37";
+            } else {
+                // Night
+                els.handSun.style.opacity = 0.4;
+                els.solarPct.style.color = "#555";
+                
+                let elapsedNight, totalNight;
+                
+                if (nowTime > setTime) {
+                    const nextRise = riseTime + 86400000;
+                    totalNight = nextRise - setTime;
+                    elapsedNight = nowTime - setTime;
+                } else {
+                    const prevSet = setTime - 86400000;
+                    totalNight = riseTime - prevSet;
+                    elapsedNight = nowTime - prevSet;
+                }
+                
+                const frac = elapsedNight / totalNight;
+                angle = 90 + (frac * 180);
+                pct = 100;
+            }
+            
+            els.handSun.style.transform = `rotate(${angle}deg)`;
+            els.solarPct.innerText = `${pct}%`;
+        }
+        
+        init();
+    </script>
+</body>
+</html>
